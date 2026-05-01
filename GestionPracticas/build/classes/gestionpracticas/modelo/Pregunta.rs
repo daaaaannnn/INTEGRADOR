@@ -1,0 +1,1 @@
+com.gestionpracticas.modelo.Pregunta
