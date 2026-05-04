@@ -1,63 +1,69 @@
 package gestionpracticas.util;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ConexionBD {
-    
+
     private static ConexionBD instancia;
     private Connection connection = null;
-    
-    private final String URL = "jdbc:oracle:thin:@localhost:1521:XE";
-    private final String USUARIO = "PROYECTOJD";
-    private final String CONTRASENA = "PROYECTOJD";
-    
+
+    private final String url      = "jdbc:oracle:thin:@localhost:1521:XE";
+    private final String user     = "PROYECTOJD";
+    private final String password = "PROYECTOJD";
+
+    // Constructor privado para Singleton
     private ConexionBD() {
+        conectar();
+    }
+
+    // Método para conectar a la base de datos
+    private void conectar() {
         try {
-            System.out.println("=========================================");
-            System.out.println("  Conectando a Oracle XE...");
-            System.out.println("=========================================");
-            
-            // Cargar el driver
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            
-            connection = DriverManager.getConnection(URL, USUARIO, CONTRASENA);
-            
-            System.out.println("✅ ¡CONEXIÓN EXITOSA!");
-            System.out.println("=========================================");
-            
-        } catch (ClassNotFoundException e) {
-            System.err.println("❌ Driver no encontrado");
-            System.err.println("Verifica que ojdbc8.jar esté en Libraries");
-            System.err.println("=========================================");
-        } catch (SQLException e) {
-            System.err.println("❌ Error de conexión: " + e.getMessage());
-            System.err.println("Verifica que Oracle esté corriendo");
-            System.err.println("Verifica el usuario PROYECTOJD");
-            System.err.println("=========================================");
+            connection = DriverManager.getConnection(url, user, password);
+            if (connection != null) {
+                DatabaseMetaData meta = connection.getMetaData();
+                System.out.println("Conexión establecida: " + meta.getDriverName());
+                System.out.println("Usuario: " + user);
+            }
+        } catch (ClassNotFoundException ex) {
+            Logger.getLogger(ConexionBD.class.getName()).log(Level.SEVERE,
+                    "Driver Oracle no encontrado. Agrega ojdbc.jar al proyecto.", ex);
+        } catch (SQLException ex) {
+            Logger.getLogger(ConexionBD.class.getName()).log(Level.SEVERE,
+                    "Error al conectar con la base de datos PROYECTOJD", ex);
         }
     }
-    
+
+    // Método Singleton
     public static ConexionBD getInstancia() {
         if (instancia == null) {
             instancia = new ConexionBD();
         }
         return instancia;
     }
-    
+
+    // Devuelve el Connection para hacer consultas
     public Connection getConnection() {
         return connection;
     }
-    
+
+    // Cierra la conexión
     public void cerrarConexion() {
         try {
             if (connection != null && !connection.isClosed()) {
                 connection.close();
-                System.out.println("✅ Conexión cerrada");
+                instancia = null;
+                System.out.println("Conexión cerrada correctamente.");
             }
-        } catch (SQLException e) {
-            System.err.println("Error: " + e.getMessage());
+        } catch (SQLException ex) {
+            Logger.getLogger(ConexionBD.class.getName()).log(Level.SEVERE,
+                    "Error al cerrar la conexión", ex);
         }
     }
 }

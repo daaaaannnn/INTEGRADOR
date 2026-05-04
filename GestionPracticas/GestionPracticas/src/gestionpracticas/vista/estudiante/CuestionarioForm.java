@@ -1,16 +1,16 @@
-package gestionpracticas.vista.estudiante;
+package com.gestionpracticas.vista.estudiante;
 
-import gestionpracticas.logica.MatriculaPracticaLogica;
-import gestionpracticas.modelo.MatriculaPractica;
-import gestionpracticas.modelo.Usuario;
+import com.gestionpracticas.dao.PreguntaDAO;
+import com.gestionpracticas.logica.MatriculaPracticaLogica;
+import com.gestionpracticas.modelo.*;
 import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
 public class CuestionarioForm extends JFrame {
 
-    private final Usuario usuarioActual;
-    private final MatriculaPracticaLogica matriculaLogica;
+    private Usuario usuarioActual;
+    private MatriculaPracticaLogica matriculaLogica;
 
     private JComboBox<String> cmbMatricula;
     private JPanel panelPreguntas;

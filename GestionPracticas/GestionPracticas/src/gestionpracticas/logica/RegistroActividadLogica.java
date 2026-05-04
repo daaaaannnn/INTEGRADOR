@@ -36,11 +36,7 @@ public class RegistroActividadLogica {
         return dao.actualizarEstado(idRegistro, "APROBADO");
     }
 
-    public boolean rechazar(int idRegistro, String motivo) {
+    public boolean rechazar(int idRegistro) {
         return dao.actualizarEstado(idRegistro, "RECHAZADO");
-    }
-
-    public List<RegistroActividad> listarTodos() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

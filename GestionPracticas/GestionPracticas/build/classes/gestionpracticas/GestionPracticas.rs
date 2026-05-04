@@ -1,6 +1,0 @@
-gestionpracticas.MatriculaPracticaLogica
-gestionpracticas.AsignacionDocenteLogica
-gestionpracticas.CursoLogica
-gestionpracticas.EvaluacionLogica
-gestionpracticas.GrupoLogica
-gestionpracticas.RegistroActividadLogica

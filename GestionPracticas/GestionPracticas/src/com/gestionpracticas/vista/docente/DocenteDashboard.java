@@ -4,16 +4,10 @@
  */
 package com.gestionpracticas.vista.docente;
 
-import gestionpracticas.modelo.Usuario;
-
 /**
  *
  * @author joser
  */
 public class DocenteDashboard {
-
-    public DocenteDashboard(Usuario usuario) {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-    }
     
 }
