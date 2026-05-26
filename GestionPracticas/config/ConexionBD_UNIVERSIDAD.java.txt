@@ -1,0 +1,4 @@
+// Configuración usada en esta versión para la base de datos de la universidad:
+"jdbc:oracle:thin:@192.168.254.215:1521:orcl"
+// Usuario: PROYECTOJD
+// Contraseña: PROYECTOJD
