@@ -1,7 +1,6 @@
 package com.gestionpracticas.vista.coordinador;
 
 import com.gestionpracticas.logica.AsignacionDocenteLogica;
-import com.gestionpracticas.logica.AsignacionDocenteLogica;
 import com.gestionpracticas.logica.PracticaLogica;
 import com.gestionpracticas.logica.UsuarioLogica;
 import com.gestionpracticas.modelo.AsignacionDocente;

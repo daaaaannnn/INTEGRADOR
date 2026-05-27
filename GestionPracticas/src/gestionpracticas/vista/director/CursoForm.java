@@ -6,12 +6,16 @@ import com.gestionpracticas.modelo.Curso;
 import com.gestionpracticas.modelo.Programa;
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.Utilidades;
+import com.gestionpracticas.util.DBHelper;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import javax.swing.border.Border;
 import java.awt.event.*;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 
 public class CursoForm extends JFrame {
     
@@ -22,7 +26,7 @@ public class CursoForm extends JFrame {
     // Componentes del formulario
     private JTextField txtNombre, txtCodigo, txtCreditos, txtDescripcion, txtBuscar;
     private JComboBox cmbPrograma;
-    private JButton btnGuardar, btnLimpiar, btnEliminar, btnRefrescar, btnBuscar;
+    private JButton btnGuardar, btnLimpiar, btnEliminar, btnActivar, btnRefrescar, btnBuscar;
     private JTable tabla;
     private DefaultTableModel modeloTabla;
     
@@ -165,8 +169,10 @@ public class CursoForm extends JFrame {
         // Popup menu
         final JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem editarItem = new JMenuItem(" Editar Curso");
-        JMenuItem eliminarItem = new JMenuItem(" Eliminar Curso");
+        JMenuItem activarItem = new JMenuItem(" Activar Curso");
+        JMenuItem eliminarItem = new JMenuItem(" Inactivar Curso");
         popupMenu.add(editarItem);
+        popupMenu.add(activarItem);
         popupMenu.add(eliminarItem);
         
         tabla.addMouseListener(new MouseAdapter() {
@@ -195,9 +201,15 @@ public class CursoForm extends JFrame {
             }
         });
         
+        activarItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cambiarEstadoCurso("ACTIVO");
+            }
+        });
+
         eliminarItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                eliminarCurso();
+                cambiarEstadoCurso("INACTIVO");
             }
         });
         
@@ -346,8 +358,22 @@ public class CursoForm extends JFrame {
             }
         });
         
-        btnEliminar = new JButton(" Eliminar Curso");
-        btnEliminar.setBackground(new Color(192, 57, 43));
+        btnActivar = new JButton(" Activar Curso");
+        btnActivar.setBackground(new Color(22, 160, 133));
+        btnActivar.setForeground(Color.WHITE);
+        btnActivar.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btnActivar.setFocusPainted(false);
+        btnActivar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnActivar.setPreferredSize(new Dimension(150, 42));
+        btnActivar.setEnabled(false);
+        btnActivar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                cambiarEstadoCurso("ACTIVO");
+            }
+        });
+
+        btnEliminar = new JButton(" Inactivar Curso");
+        btnEliminar.setBackground(new Color(243, 156, 18));
         btnEliminar.setForeground(Color.WHITE);
         btnEliminar.setFont(new Font("Segoe UI", Font.BOLD, 13));
         btnEliminar.setFocusPainted(false);
@@ -375,13 +401,16 @@ public class CursoForm extends JFrame {
         
         panel.add(btnGuardar);
         panel.add(btnLimpiar);
+        panel.add(btnActivar);
         panel.add(btnEliminar);
         panel.add(btnCerrar);
         
         // Habilitar botón eliminar cuando se selecciona una fila
         tabla.getSelectionModel().addListSelectionListener(new javax.swing.event.ListSelectionListener() {
             public void valueChanged(javax.swing.event.ListSelectionEvent e) {
-                btnEliminar.setEnabled(tabla.getSelectedRow() >= 0);
+                boolean seleccionado = tabla.getSelectedRow() >= 0;
+                btnEliminar.setEnabled(seleccionado);
+                if (btnActivar != null) btnActivar.setEnabled(seleccionado);
             }
         });
         
@@ -417,6 +446,7 @@ public class CursoForm extends JFrame {
         modeloTabla.setRowCount(0);
         try {
             List cursos = cursoLogica.listarTodos();
+            ordenarCursos(cursos);
             for (int i = 0; i < cursos.size(); i++) {
                 Curso c = (Curso) cursos.get(i);
                 String programa = c.getPrograma() != null ? c.getPrograma().getNombre() : "N/A";
@@ -435,6 +465,7 @@ public class CursoForm extends JFrame {
         modeloTabla.setRowCount(0);
         try {
             List cursos = cursoLogica.listarTodos();
+            ordenarCursos(cursos);
             for (int i = 0; i < cursos.size(); i++) {
                 Curso c = (Curso) cursos.get(i);
                 String programa = c.getPrograma() != null ? c.getPrograma().getNombre() : "N/A";
@@ -538,10 +569,47 @@ public class CursoForm extends JFrame {
         }
     }
     
+    private void ordenarCursos(List cursos) {
+        try {
+            Collections.sort(cursos, new Comparator() {
+                public int compare(Object o1, Object o2) {
+                    Curso a = (Curso) o1;
+                    Curso b = (Curso) o2;
+                    int pa = DBHelper.prioridadEstado(a.getEstado());
+                    int pb = DBHelper.prioridadEstado(b.getEstado());
+                    if (pa != pb) return pa - pb;
+                    return a.getNombre().compareToIgnoreCase(b.getNombre());
+                }
+            });
+        } catch (Exception ex) { }
+    }
+
+    private void cambiarEstadoCurso(String estado) {
+        int fila = tabla.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un curso para cambiar estado");
+            return;
+        }
+        int id = ((Integer) modeloTabla.getValueAt(fila, 0)).intValue();
+        try {
+            LinkedHashMap datos = new LinkedHashMap();
+            datos.put("ESTADO", estado);
+            if (DBHelper.actualizar("CURSO", "ID_CURSO", new Integer(id), datos)) {
+                JOptionPane.showMessageDialog(this, "Curso actualizado a " + estado);
+                limpiarFormulario();
+                cargarTabla();
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo cambiar el estado del curso");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }
+
     private void eliminarCurso() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
-            JOptionPane.showMessageDialog(this, "Seleccione un curso para eliminar");
+            JOptionPane.showMessageDialog(this, "Seleccione un curso para inactivar");
             return;
         }
         
@@ -549,17 +617,17 @@ public class CursoForm extends JFrame {
         String nombre = (String) modeloTabla.getValueAt(fila, 1);
         
         int confirm = JOptionPane.showConfirmDialog(this,
-          "¿Eliminar el curso '" + nombre + "'?\nEsta acción no se puede deshacer.",
-          "Confirmar eliminación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+          "¿Inactivar el curso '" + nombre + "'?\nEl curso quedará oculto como inactivo, pero no se borra de la base de datos.",
+          "Confirmar inactivación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         
         if (confirm == JOptionPane.YES_OPTION) {
             try {
                 if (cursoLogica.eliminar(id)) {
-                    JOptionPane.showMessageDialog(this, " Curso eliminado correctamente");
+                    JOptionPane.showMessageDialog(this, " Curso inactivado correctamente");
                     limpiarFormulario();
                     cargarTabla();
                 } else {
-                    JOptionPane.showMessageDialog(this, " Error al eliminar el curso");
+                    JOptionPane.showMessageDialog(this, " Error al inactivar el curso");
                 }
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
@@ -576,6 +644,7 @@ public class CursoForm extends JFrame {
         btnGuardar.setText("Guardar Curso");
         idSeleccionado = -1;
         btnEliminar.setEnabled(false);
+        if (btnActivar != null) btnActivar.setEnabled(false);
         txtNombre.requestFocus();
     }
 }

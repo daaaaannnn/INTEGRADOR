@@ -254,6 +254,84 @@ public class DBHelper {
         return filas;
     }
 
+
+    public static int prioridadEstado(String estado) {
+        if (estado == null) return 99;
+        String e = estado.trim().toUpperCase();
+        if (e.equals("ACTIVO")) return 1;
+        if (e.equals("PENDIENTE")) return 2;
+        if (e.equals("APROBADO")) return 3;
+        if (e.equals("REGISTRADO") || e.equals("REGISTRADA")) return 4;
+        if (e.equals("ENVIADA")) return 5;
+        if (e.equals("RECHAZADO") || e.equals("REPROBADO")) return 6;
+        if (e.equals("FINALIZADO") || e.equals("FINALIZADA")) return 7;
+        if (e.equals("INACTIVO")) return 8;
+        if (e.equals("ELIMINADO")) return 9;
+        return 50;
+    }
+
+    public static String ordenEstadoSql(String tabla, String idCol) {
+        String id = (idCol == null || idCol.trim().length() == 0) ? "1" : idCol;
+        if (!tieneColumna(tabla, "ESTADO")) return id;
+        return "CASE NVL(UPPER(ESTADO),'ACTIVO') " +
+               "WHEN 'ACTIVO' THEN 1 " +
+               "WHEN 'PENDIENTE' THEN 2 " +
+               "WHEN 'APROBADO' THEN 3 " +
+               "WHEN 'REGISTRADO' THEN 4 " +
+               "WHEN 'REGISTRADA' THEN 4 " +
+               "WHEN 'ENVIADA' THEN 5 " +
+               "WHEN 'RECHAZADO' THEN 6 " +
+               "WHEN 'REPROBADO' THEN 6 " +
+               "WHEN 'FINALIZADO' THEN 7 " +
+               "WHEN 'FINALIZADA' THEN 7 " +
+               "WHEN 'INACTIVO' THEN 8 " +
+               "WHEN 'ELIMINADO' THEN 9 " +
+               "ELSE 50 END, " + id;
+    }
+
+    public static boolean cambiarEstado(String tabla, String idCol, Object id, String estado) {
+        try {
+            if (!tieneColumna(tabla, "ESTADO")) return false;
+            LinkedHashMap<String, Object> datos = new LinkedHashMap<String, Object>();
+            datos.put("ESTADO", estado);
+            return actualizar(tabla, idCol, id, datos);
+        } catch (Exception e) {
+            System.err.println("DBHelper.cambiarEstado " + tabla + ": " + e.getMessage());
+            return false;
+        }
+    }
+
+    public static Object convertirValor(String tabla, String columna, String valor) {
+        if (valor == null || valor.trim().length() == 0) return null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = con().prepareStatement("SELECT DATA_TYPE FROM USER_TAB_COLUMNS WHERE TABLE_NAME = UPPER(?) AND COLUMN_NAME = UPPER(?)");
+            ps.setString(1, tabla);
+            ps.setString(2, columna);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                String tipo = rs.getString(1);
+                if (tipo != null) {
+                    tipo = tipo.toUpperCase();
+                    if (tipo.indexOf("NUMBER") >= 0) {
+                        if (valor.indexOf('.') >= 0 || valor.indexOf(',') >= 0) return new Double(valor.replace(',', '.'));
+                        return new Integer(valor);
+                    }
+                    if (tipo.indexOf("DATE") >= 0) {
+                        try { return java.sql.Date.valueOf(valor); } catch (Exception ex) { return valor; }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            return valor;
+        } finally {
+            Utilidades.cerrar(rs);
+            Utilidades.cerrar(ps);
+        }
+        return valor;
+    }
+
     private static void setParam(PreparedStatement ps, int index, Object value) throws SQLException {
         if (value == null) ps.setNull(index, Types.VARCHAR);
         else if (value instanceof Integer) ps.setInt(index, ((Integer)value).intValue());

@@ -128,7 +128,7 @@ public class DirectorDashboard extends JFrame {
         JLabel bienvenida = new JLabel("Bienvenido, " + usuario.getNombre());
         bienvenida.setForeground(Color.WHITE);
         bienvenida.setFont(new Font("Segoe UI", Font.BOLD, 28));
-        JLabel subtitulo = new JLabel("Panel administrativo universitario conectado a Oracle 10g");
+        JLabel subtitulo = new JLabel("Panel administrativo");
         subtitulo.setForeground(Color.WHITE);
         subtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         JPanel textos = new JPanel(new GridLayout(2, 1));

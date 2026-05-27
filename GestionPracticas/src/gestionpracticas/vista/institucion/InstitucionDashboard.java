@@ -2,7 +2,6 @@ package com.gestionpracticas.vista.institucion;
 
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.DBHelper;
-import com.gestionpracticas.util.SemillasProyecto;
 import com.gestionpracticas.vista.LoginForm;
 import com.gestionpracticas.vista.comun.CrudTablaFrame;
 import javax.swing.*;
@@ -51,15 +50,13 @@ public class InstitucionDashboard extends JFrame {
         JButton btnEstudiantes = boton("Estudiantes Asignados");
         JButton btnPracticas = boton("Prácticas en la Sede");
         JButton btnConvenio = boton("Datos Institución");
-        JButton btnDemo = boton("Crear Institución Base");
         JButton btnSalir = boton("Cerrar Sesión");
         btnHoras.addActionListener(e -> new HorasForm(usuario).setVisible(true));
         btnEstudiantes.addActionListener(e -> new CrudTablaFrame("Estudiantes / Matrículas", "MATRICULA_PRACTICA", "ID_MATRICULA_PRACTICA", new String[]{"ID_MATRICULA_PRACTICA","ID_ESTUDIANTE","ID_USUARIO","ID_PRACTICA","ID_GRUPO","ID_INSTITUCION","FECHA_MATRICULA","ESTADO"}).setVisible(true));
         btnPracticas.addActionListener(e -> new CrudTablaFrame("Prácticas Institución", "PRACTICA", "ID_PRACTICA", new String[]{"ID_PRACTICA","TITULO","NOMBRE","DESCRIPCION","TIPO_PRACTICA","TIPO_MODALIDAD","HORAS_REQUERIDAS","HORAS_REGLAMENTARIAS","ID_INSTITUCION","ID_CURSO","ID_GRUPO","ESTADO"}).setVisible(true));
-        btnConvenio.addActionListener(e -> new CrudTablaFrame("Institución Receptora", "INSTITUCION", "ID_INSTITUCION", new String[]{"ID_INSTITUCION","NOMBRE","NIT","DIRECCION","TELEFONO","EMAIL","CORREO","CIUDAD","MUNICIPIO","REPRESENTANTE","RECTOR","ESTADO"}).setVisible(true));
-        btnDemo.addActionListener(e -> JOptionPane.showMessageDialog(this, SemillasProyecto.asegurarDatosBase(usuario), "Datos base", JOptionPane.INFORMATION_MESSAGE));
+        btnConvenio.addActionListener(e -> new CrudTablaFrame("Institución Receptora", "INSTITUCION", "ID_INSTITUCION", new String[]{"ID_INSTITUCION","NOMBRE","NIT","DIRECCION","TELEFONO","EMAIL","CORREO","CIUDAD","MUNICIPIO","REPRESENTANTE","RECTOR","SITIO_WEB","LOGO","ESTADO"}).setVisible(true));
         btnSalir.addActionListener(e -> { dispose(); new LoginForm().setVisible(true); });
-        menu.add(logo); menu.add(btnHoras); menu.add(btnEstudiantes); menu.add(btnPracticas); menu.add(btnConvenio); menu.add(btnDemo); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
+        menu.add(logo); menu.add(btnHoras); menu.add(btnEstudiantes); menu.add(btnPracticas); menu.add(btnConvenio); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
 
         JPanel contenido = new JPanel(new BorderLayout(20,20)); contenido.setOpaque(false);
         JPanel header = new JPanel(new BorderLayout()); header.setBackground(new Color(41,128,185)); header.setBorder(new EmptyBorder(20,25,20,25));

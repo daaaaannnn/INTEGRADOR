@@ -3,6 +3,7 @@ package com.gestionpracticas.vista.director;
 import com.gestionpracticas.logica.UsuarioLogica;
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.Utilidades;
+import com.gestionpracticas.util.DBHelper;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
@@ -12,6 +13,8 @@ import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 public class UsuarioForm extends JFrame {
     
@@ -26,7 +29,7 @@ public class UsuarioForm extends JFrame {
     private JPasswordField txtContrasena, txtConfirmarContrasena;
     private JComboBox cmbTipoUsuario;
     private JTextArea txtObservaciones;
-    private JButton btnGuardar, btnLimpiar, btnEliminar, btnRefrescar, btnBuscar;
+    private JButton btnGuardar, btnLimpiar, btnEliminar, btnActivar, btnEliminarDefinitivo, btnRefrescar, btnBuscar;
     private JButton btnCambiarPass, btnRegistrarError;
     private JTable tabla;
     private DefaultTableModel modeloTabla;
@@ -112,9 +115,12 @@ public class UsuarioForm extends JFrame {
         panelBusqueda.add(btnBuscar);
         panelBusqueda.add(Box.createHorizontalStrut(20));
         panelBusqueda.add(btnRefrescar);
-        JLabel lblAyudaCrud = new JLabel(" Crear: diligencia el formulario y pulsa Guardar | Modificar: doble clic en la tabla | Eliminar: selecciona una fila y pulsa Eliminar | Contraseña: clic derecho o pestaña Seguridad");
-        lblAyudaCrud.setFont(new Font("Segoe UI", Font.PLAIN, 11));
-        lblAyudaCrud.setForeground(new Color(80, 80, 80));
+        JLabel lblAyudaCrud = new JLabel("  Crear: diligencia y Guarda | Editar: doble clic | Activar/Inactivar: selecciona una fila | Contraseña: clic derecho o pestaña Seguridad  ");
+        lblAyudaCrud.setOpaque(true);
+        lblAyudaCrud.setFont(new Font("Segoe UI", Font.BOLD, 11));
+        lblAyudaCrud.setForeground(new Color(27, 38, 59));
+        lblAyudaCrud.setBackground(new Color(232, 244, 253));
+        lblAyudaCrud.setBorder(BorderFactory.createLineBorder(new Color(41, 128, 185)));
         panelBusqueda.add(lblAyudaCrud);
         
         // Split pane
@@ -144,10 +150,14 @@ public class UsuarioForm extends JFrame {
         
         final JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem editarItem = new JMenuItem(" Editar Usuario");
-        JMenuItem eliminarItem = new JMenuItem(" Eliminar Usuario");
+        JMenuItem activarItem = new JMenuItem(" Activar Usuario");
+        JMenuItem eliminarItem = new JMenuItem(" Inactivar Usuario");
+        JMenuItem eliminarDefItem = new JMenuItem(" Eliminar Definitivo");
         JMenuItem cambiarPassItem = new JMenuItem(" Cambiar Contraseña");
         popupMenu.add(editarItem);
+        popupMenu.add(activarItem);
         popupMenu.add(eliminarItem);
+        popupMenu.add(eliminarDefItem);
         popupMenu.addSeparator();
         popupMenu.add(cambiarPassItem);
         
@@ -177,9 +187,21 @@ public class UsuarioForm extends JFrame {
             }
         });
         
+        activarItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activarUsuario();
+            }
+        });
+        
         eliminarItem.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 eliminarUsuario();
+            }
+        });
+        
+        eliminarDefItem.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                eliminarDefinitivoUsuario();
             }
         });
         
@@ -195,18 +217,44 @@ public class UsuarioForm extends JFrame {
         JPanel panelBotonesTabla = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         panelBotonesTabla.setBackground(Color.WHITE);
         
-        btnEliminar = new JButton(" Eliminar Seleccionado");
-        btnEliminar.setBackground(new Color(192, 57, 43));
+        btnActivar = new JButton(" Activar");
+        btnActivar.setBackground(new Color(22, 160, 133));
+        btnActivar.setForeground(Color.WHITE);
+        btnActivar.setFocusPainted(false);
+        btnActivar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnActivar.setPreferredSize(new Dimension(100, 35));
+        btnActivar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                activarUsuario();
+            }
+        });
+
+        btnEliminar = new JButton(" Inactivar");
+        btnEliminar.setBackground(new Color(243, 156, 18));
         btnEliminar.setForeground(Color.WHITE);
         btnEliminar.setFocusPainted(false);
         btnEliminar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnEliminar.setPreferredSize(new Dimension(160, 35));
+        btnEliminar.setPreferredSize(new Dimension(110, 35));
         btnEliminar.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 eliminarUsuario();
             }
         });
+
+        btnEliminarDefinitivo = new JButton(" Eliminar definitivo");
+        btnEliminarDefinitivo.setBackground(new Color(192, 57, 43));
+        btnEliminarDefinitivo.setForeground(Color.WHITE);
+        btnEliminarDefinitivo.setFocusPainted(false);
+        btnEliminarDefinitivo.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnEliminarDefinitivo.setPreferredSize(new Dimension(165, 35));
+        btnEliminarDefinitivo.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                eliminarDefinitivoUsuario();
+            }
+        });
+        panelBotonesTabla.add(btnActivar);
         panelBotonesTabla.add(btnEliminar);
+        panelBotonesTabla.add(btnEliminarDefinitivo);
         
         panelTabla.add(scrollTabla, BorderLayout.CENTER);
         panelTabla.add(panelBotonesTabla, BorderLayout.SOUTH);
@@ -589,6 +637,7 @@ public class UsuarioForm extends JFrame {
             } else {
                 usuarios = usuarioLogica.obtenerTodos();
             }
+            ordenarUsuarios(usuarios);
             for (int i = 0; i < usuarios.size(); i++) {
                 Usuario u = (Usuario) usuarios.get(i);
                 modeloTabla.addRow(new Object[]{
@@ -611,6 +660,7 @@ public class UsuarioForm extends JFrame {
             } else {
                 usuarios = usuarioLogica.obtenerTodos();
             }
+            ordenarUsuarios(usuarios);
             for (int i = 0; i < usuarios.size(); i++) {
                 Usuario u = (Usuario) usuarios.get(i);
                 if (u.getNombre().toLowerCase().indexOf(busqueda) >= 0 || 
@@ -728,6 +778,47 @@ public class UsuarioForm extends JFrame {
         }
     }
     
+    private int prioridadEstadoUsuario(String estado) {
+        return DBHelper.prioridadEstado(estado);
+    }
+
+    private void ordenarUsuarios(List usuarios) {
+        try {
+            Collections.sort(usuarios, new Comparator() {
+                public int compare(Object o1, Object o2) {
+                    Usuario a = (Usuario) o1;
+                    Usuario b = (Usuario) o2;
+                    int pa = prioridadEstadoUsuario(a.getEstado());
+                    int pb = prioridadEstadoUsuario(b.getEstado());
+                    if (pa != pb) return pa - pb;
+                    String na = (a.getNombre() + " " + a.getApellido()).toUpperCase();
+                    String nb = (b.getNombre() + " " + b.getApellido()).toUpperCase();
+                    return na.compareTo(nb);
+                }
+            });
+        } catch (Exception ex) { }
+    }
+
+    private void activarUsuario() {
+        int fila = tabla.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un usuario para activar");
+            return;
+        }
+        int id = ((Integer) modeloTabla.getValueAt(fila, 0)).intValue();
+        try {
+            if (usuarioLogica.activarUsuario(id)) {
+                JOptionPane.showMessageDialog(this, "Usuario activado correctamente");
+                cargarTabla();
+                limpiarFormulario();
+            } else {
+                JOptionPane.showMessageDialog(this, "No se pudo activar el usuario");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+        }
+    }
+
     private void eliminarUsuario() {
         int fila = tabla.getSelectedRow();
         if (fila < 0) {
@@ -757,6 +848,32 @@ public class UsuarioForm extends JFrame {
         }
     }
     
+    private void eliminarDefinitivoUsuario() {
+        int fila = tabla.getSelectedRow();
+        if (fila < 0) {
+            JOptionPane.showMessageDialog(this, "Seleccione un usuario para eliminar definitivamente");
+            return;
+        }
+        int id = ((Integer) modeloTabla.getValueAt(fila, 0)).intValue();
+        String nombre = (String) modeloTabla.getValueAt(fila, 1);
+        int confirm = JOptionPane.showConfirmDialog(this,
+          "¿Eliminar DEFINITIVAMENTE al usuario " + nombre + "?\nOracle no lo permitirá si tiene matrículas, evaluaciones o registros relacionados.\nPara entrega se recomienda usar Inactivar.",
+          "Confirmar eliminación definitiva", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        if (confirm == JOptionPane.YES_OPTION) {
+            try {
+                if (DBHelper.borrar("USUARIO", "ID_USUARIO", new Integer(id))) {
+                    JOptionPane.showMessageDialog(this, "Usuario eliminado definitivamente");
+                    cargarTabla();
+                    limpiarFormulario();
+                } else {
+                    JOptionPane.showMessageDialog(this, "No se pudo eliminar definitivamente. Puede tener datos relacionados; use Inactivar.");
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Error: " + e.getMessage());
+            }
+        }
+    }
+
     private void limpiarFormulario() {
         txtNombre.setText("");
         txtApellido.setText("");

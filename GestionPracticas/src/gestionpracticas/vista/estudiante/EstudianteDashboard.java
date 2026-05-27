@@ -2,7 +2,6 @@ package com.gestionpracticas.vista.estudiante;
 
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.DBHelper;
-import com.gestionpracticas.util.SemillasProyecto;
 import com.gestionpracticas.vista.LoginForm;
 import com.gestionpracticas.vista.comun.CrudTablaFrame;
 import javax.swing.*;
@@ -58,15 +57,15 @@ public class EstudianteDashboard extends JFrame {
         JButton btnCuestionario = crearBoton("Responder Cuestionario");
         JButton btnReporte = crearBoton("Reportar Avance");
         JButton btnCalificacion = crearBoton("Consultar Calificación");
-        JButton btnDatosBase = crearBoton("Crear Matrícula Prueba");
+        JButton btnMatricula = crearBoton("Mi matrícula / proceso");
         JButton btnCerrar = crearBoton("Cerrar Sesión");
         btnActividad.addActionListener(e -> new ActividadForm(usuario).setVisible(true));
         btnCuestionario.addActionListener(e -> new CuestionarioForm(usuario).setVisible(true));
         btnReporte.addActionListener(e -> new CrudTablaFrame("Reportes del Estudiante", "REPORTE", "ID_REPORTE", new String[]{"ID_REPORTE","ID_USUARIO","ID_ESTUDIANTE","TITULO","NOMBRE","DESCRIPCION","DETALLE","COMENTARIOS","ESTADO","FECHA","FECHA_GENERACION"}).setVisible(true));
         btnCalificacion.addActionListener(e -> new CrudTablaFrame("Consulta de Evaluación", "EVALUACION", "ID_EVALUACION", new String[]{"ID_EVALUACION","ID_MATRICULA_PRACTICA","ID_RUBRICA","ID_EVALUADOR","PUNTAJE_OBTENIDO","NOTA_EVALUACION","OBSERVACIONES","FECHA_EVALUACION","ESTADO"}).setVisible(true));
-        btnDatosBase.addActionListener(e -> JOptionPane.showMessageDialog(this, SemillasProyecto.asegurarDatosBase(usuario), "Matrícula y datos de prueba", JOptionPane.INFORMATION_MESSAGE));
+        btnMatricula.addActionListener(e -> new CrudTablaFrame("Mi Matrícula de Práctica", "MATRICULA_PRACTICA", "ID_MATRICULA_PRACTICA", new String[]{"ID_MATRICULA_PRACTICA","ID_ESTUDIANTE","ID_USUARIO","ID_PRACTICA","ID_GRUPO","ID_INSTITUCION","FECHA_MATRICULA","ESTADO","HORAS_COMPLETAS"}).setVisible(true));
         btnCerrar.addActionListener(e -> { dispose(); new LoginForm().setVisible(true); });
-        menu.add(tituloMenu); menu.add(btnDashboard); menu.add(btnActividad); menu.add(btnCuestionario); menu.add(btnReporte); menu.add(btnCalificacion); menu.add(btnDatosBase); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnCerrar);
+        menu.add(tituloMenu); menu.add(btnDashboard); menu.add(btnMatricula); menu.add(btnActividad); menu.add(btnCuestionario); menu.add(btnReporte); menu.add(btnCalificacion); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnCerrar);
 
         JPanel contenido = new JPanel(new BorderLayout(20, 20)); contenido.setOpaque(false);
         JPanel header = new JPanel(new BorderLayout()); header.setBackground(new Color(41, 128, 185)); header.setBorder(new EmptyBorder(20, 25, 20, 25));
@@ -87,9 +86,9 @@ public class EstudianteDashboard extends JFrame {
         stats.add(crearCard("Reportes", reportes + " reportes disponibles"));
 
         JPanel tarjetas = new JPanel(new GridLayout(2, 2, 20, 20)); tarjetas.setOpaque(false); tarjetas.setBorder(new EmptyBorder(10, 30, 30, 30));
-        tarjetas.add(crearCard("Registrar actividades y horas", "Registra las actividades pedagógicas realizadas durante la práctica, indicando descripción, tipo y horas invertidas. Si no aparece una práctica, usa Crear Matrícula Prueba."));
+        tarjetas.add(crearCard("Registrar actividades y horas", "Registra las actividades pedagógicas realizadas durante la práctica, indicando descripción, tipo y horas invertidas. Si no aparece una matrícula, solicita al Coordinador o Docente la asignación antes de registrar actividades."));
         tarjetas.add(crearCard("Responder evaluación", "Responde las preguntas configuradas por el docente asesor y deja evidencia del proceso formativo."));
-        tarjetas.add(crearCard("Curso y carrera", "La práctica se vincula al programa, curso, grupo e institución receptora para mantener trazabilidad académica."));
+        tarjetas.add(crearCard("Paso a paso del estudiante", "1) Verifica tu matrícula. 2) Registra actividades y evidencias. 3) Responde cuestionarios. 4) Consulta retroalimentación y nota. Si tienes pendientes, el estado aparecerá como PENDIENTE o REGISTRADO."));
         tarjetas.add(crearCard("Calificación", "Consulta la nota final, la observación general y la retroalimentación del docente asesor."));
         contenido.add(header, BorderLayout.NORTH); contenido.add(stats, BorderLayout.CENTER); contenido.add(tarjetas, BorderLayout.SOUTH);
         principal.add(menu, BorderLayout.WEST); principal.add(contenido, BorderLayout.CENTER); setContentPane(principal);

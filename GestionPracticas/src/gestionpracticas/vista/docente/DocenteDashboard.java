@@ -2,7 +2,6 @@ package com.gestionpracticas.vista.docente;
 
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.DBHelper;
-import com.gestionpracticas.util.SemillasProyecto;
 import com.gestionpracticas.vista.LoginForm;
 import com.gestionpracticas.vista.comun.CrudTablaFrame;
 import javax.swing.*;
@@ -52,7 +51,6 @@ public class DocenteDashboard extends JFrame {
         JButton btnEvaluacion = boton("Evaluar Estudiante");
         JButton btnActividades = boton("Revisar Actividades");
         JButton btnRespuestas = boton("Respuestas / Feedback");
-        JButton btnDemo = boton("Crear Datos Base");
         JButton btnSalir = boton("Cerrar Sesión");
 
         btnRubrica.addActionListener(e -> new RubricaForm(usuario).setVisible(true));
@@ -60,9 +58,8 @@ public class DocenteDashboard extends JFrame {
         btnEvaluacion.addActionListener(e -> new EvaluacionForm(usuario).setVisible(true));
         btnActividades.addActionListener(e -> new CrudTablaFrame("Revisión de Actividades del Estudiante", "REGISTRO_ACTIVIDAD", "ID_REGISTRO", new String[]{"ID_REGISTRO","ID_MATRICULA_PRACTICA","ID_ESTUDIANTE","FECHA_ACTIVIDAD","DESCRIPCION","HORAS","TIPO_ACTIVIDAD","EVIDENCIA","ESTADO","OBSERVACIONES"}).setVisible(true));
         btnRespuestas.addActionListener(e -> new CrudTablaFrame("Respuestas y Retroalimentación", "RESPUESTA", "ID_RESPUESTA", new String[]{"ID_RESPUESTA","ID_PREGUNTA","ID_USUARIO","ID_ESTUDIANTE","CONTENIDO_RESPUESTA","RESPUESTA","RETROALIMENTACION","OBSERVACION","FECHA_RESPUESTA","ESTADO"}).setVisible(true));
-        btnDemo.addActionListener(e -> JOptionPane.showMessageDialog(this, SemillasProyecto.asegurarDatosBase(usuario), "Datos base", JOptionPane.INFORMATION_MESSAGE));
         btnSalir.addActionListener(e -> { dispose(); new LoginForm().setVisible(true); });
-        menu.add(logo); menu.add(btnRubrica); menu.add(btnPreguntas); menu.add(btnEvaluacion); menu.add(btnActividades); menu.add(btnRespuestas); menu.add(btnDemo); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
+        menu.add(logo); menu.add(btnRubrica); menu.add(btnPreguntas); menu.add(btnEvaluacion); menu.add(btnActividades); menu.add(btnRespuestas); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
 
         JPanel contenido = new JPanel(new BorderLayout(20,20)); contenido.setOpaque(false);
         JPanel header = new JPanel(new BorderLayout()); header.setBackground(new Color(41,128,185)); header.setBorder(new EmptyBorder(20,25,20,25));

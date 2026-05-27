@@ -106,19 +106,23 @@ public class CrudTablaFrame extends JFrame {
             form.add(txt, gbc);
         }
 
-        JPanel btns = new JPanel(new GridLayout(2, 2, 8, 8));
+        JPanel btns = new JPanel(new GridLayout(3, 2, 8, 8));
         btns.setBackground(Color.WHITE);
         JButton guardar = boton("Guardar / Actualizar", new Color(39, 174, 96));
         JButton nuevo = boton("Nuevo", new Color(52, 152, 219));
-        JButton eliminar = boton("Eliminar / Inactivar", new Color(192, 57, 43));
+        JButton activar = boton("Activar", new Color(22, 160, 133));
+        JButton inactivar = boton("Inactivar", new Color(243, 156, 18));
+        JButton eliminar = boton("Eliminar definitivo", new Color(192, 57, 43));
         JButton refrescar = boton("Refrescar", new Color(52, 73, 94));
-        btns.add(guardar); btns.add(nuevo); btns.add(eliminar); btns.add(refrescar);
+        btns.add(guardar); btns.add(nuevo); btns.add(activar); btns.add(inactivar); btns.add(eliminar); btns.add(refrescar);
         gbc.gridy++;
         form.add(btns, gbc);
 
         guardar.addActionListener(e -> guardar());
         nuevo.addActionListener(e -> limpiar());
-        eliminar.addActionListener(e -> eliminar());
+        activar.addActionListener(e -> cambiarEstado("ACTIVO"));
+        inactivar.addActionListener(e -> cambiarEstado("INACTIVO"));
+        eliminar.addActionListener(e -> eliminarDefinitivo());
         refrescar.addActionListener(e -> cargarTabla());
 
         split.setLeftComponent(new JScrollPane(form));
@@ -151,7 +155,7 @@ public class CrudTablaFrame extends JFrame {
             }
             sql.append(" FROM ").append(tabla);
             if (DBHelper.tieneColumna(tabla, "ESTADO")) sql.append(" WHERE NVL(UPPER(ESTADO),'ACTIVO') <> 'ELIMINADO'");
-            sql.append(" ORDER BY ").append(columnas[0]);
+            sql.append(" ORDER BY ").append(DBHelper.ordenEstadoSql(tabla, columnas[0]));
             st = DBHelper.con().createStatement();
             rs = st.executeQuery(sql.toString());
             while (rs.next()) {
@@ -187,7 +191,7 @@ public class CrudTablaFrame extends JFrame {
             Map.Entry<String,JTextField> e = it.next();
             String val = e.getValue().getText().trim();
             if (val.length() == 0) continue;
-            datos.put(e.getKey(), val);
+            datos.put(e.getKey(), DBHelper.convertirValor(tabla, e.getKey(), val));
         }
         if (DBHelper.tieneColumna(tabla, "ESTADO") && !datos.containsKey("ESTADO")) datos.put("ESTADO", "ACTIVO");
         boolean ok;
@@ -205,13 +209,21 @@ public class CrudTablaFrame extends JFrame {
         }
     }
 
-    private void eliminar() {
+    private void cambiarEstado(String estado) {
         if (idSeleccionado == null) { JOptionPane.showMessageDialog(this, "Seleccione un registro."); return; }
-        int r = JOptionPane.showConfirmDialog(this, "¿Eliminar/Inactivar registro seleccionado?", "Confirmar", JOptionPane.YES_NO_OPTION);
+        if (!DBHelper.tieneColumna(tabla, "ESTADO")) { JOptionPane.showMessageDialog(this, "La tabla no tiene columna ESTADO."); return; }
+        boolean ok = DBHelper.cambiarEstado(tabla, idCol, idSeleccionado, estado);
+        if (ok) { JOptionPane.showMessageDialog(this, "Estado actualizado a " + estado + "."); limpiar(); cargarTabla(); }
+        else JOptionPane.showMessageDialog(this, "No se pudo actualizar el estado. Revise restricciones CHECK o permisos.");
+    }
+
+    private void eliminarDefinitivo() {
+        if (idSeleccionado == null) { JOptionPane.showMessageDialog(this, "Seleccione un registro."); return; }
+        int r = JOptionPane.showConfirmDialog(this, "¿Eliminar DEFINITIVAMENTE el registro seleccionado?\nSi tiene relaciones en otras tablas Oracle puede impedir la eliminación.", "Confirmar eliminación definitiva", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
         if (r == JOptionPane.YES_OPTION) {
-            boolean ok = DBHelper.eliminarLogico(tabla, idCol, idSeleccionado);
-            if (ok) { JOptionPane.showMessageDialog(this, "Registro eliminado/inactivado."); limpiar(); cargarTabla(); }
-            else JOptionPane.showMessageDialog(this, "No se pudo eliminar/inactivar.");
+            boolean ok = DBHelper.borrar(tabla, idCol, idSeleccionado);
+            if (ok) { JOptionPane.showMessageDialog(this, "Registro eliminado definitivamente."); limpiar(); cargarTabla(); }
+            else JOptionPane.showMessageDialog(this, "No se pudo eliminar definitivamente. Puede tener datos relacionados; use Inactivar.");
         }
     }
 

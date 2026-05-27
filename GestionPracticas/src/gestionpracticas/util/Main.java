@@ -14,7 +14,7 @@ public class Main {
         );
 
         System.out.println(
-          " SISTEMA DE GESTIÓN DE PRÁCTICAS - PROYECTOJD"
+          " SISTEMA DE GESTION DE PRACTICAS - PROYECTOJD"
         );
 
         System.out.println(

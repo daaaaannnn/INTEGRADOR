@@ -2,7 +2,6 @@ package com.gestionpracticas.vista.coordinador;
 
 import com.gestionpracticas.modelo.Usuario;
 import com.gestionpracticas.util.DBHelper;
-import com.gestionpracticas.util.SemillasProyecto;
 import com.gestionpracticas.vista.LoginForm;
 import com.gestionpracticas.vista.comun.CrudTablaFrame;
 import javax.swing.*;
@@ -59,22 +58,20 @@ public class CoordinadorDashboard extends JFrame {
         JButton btnMatricula = boton("Vincular Estudiantes");
         JButton btnInstitucion = boton("Instituciones Receptoras");
         JButton btnHoras = boton("Control de Horas");
-        JButton btnDemo = boton("Crear Datos Base");
         JButton btnSalir = boton("Cerrar Sesión");
 
         btnGrupos.addActionListener(e -> new GrupoForm(usuario).setVisible(true));
-        btnAsignacion.addActionListener(e -> new AsignacionForm(usuario).setVisible(true));
+        btnAsignacion.addActionListener(e -> new CrudTablaFrame("Asignación Docente", "ASIGNACION_DOCENTE", "ID_ASIGNACION_DOCENTE", new String[]{"ID_ASIGNACION_DOCENTE","FECHA_ASIGNACION","ROL_EN_PRACTICA","ID_PRACTICA","ID_USUARIO","ID_DOCENTE","ID_GRUPO","ESTADO"}).setVisible(true));
         btnMatricula.addActionListener(e -> new CrudTablaFrame("Matrícula de Estudiantes", "MATRICULA_PRACTICA", "ID_MATRICULA_PRACTICA", new String[]{"ID_MATRICULA_PRACTICA","ID_ESTUDIANTE","ID_USUARIO","ID_PRACTICA","ID_GRUPO","ID_INSTITUCION","FECHA_MATRICULA","ESTADO"}).setVisible(true));
         btnInstitucion.addActionListener(e -> new CrudTablaFrame("Instituciones Receptoras", "INSTITUCION", "ID_INSTITUCION", new String[]{"ID_INSTITUCION","NOMBRE","NIT","DIRECCION","TELEFONO","EMAIL","CORREO","CIUDAD","MUNICIPIO","REPRESENTANTE","RECTOR","ESTADO"}).setVisible(true));
         btnHoras.addActionListener(e -> new CrudTablaFrame("Control de Horas de Práctica", "HORAS_PRACTICA", "ID_HORAS_PRACTICA", new String[]{"ID_HORAS_PRACTICA","ID_MATRICULA_PRACTICA","ID_ESTUDIANTE","ID_PRACTICA","HORAS_REGISTRADAS","HORAS_CONFIRMADAS","HORAS","FECHA_REGISTRO","ESTADO","OBSERVACIONES"}).setVisible(true));
-        btnDemo.addActionListener(e -> JOptionPane.showMessageDialog(this, SemillasProyecto.asegurarDatosBase(usuario), "Datos base", JOptionPane.INFORMATION_MESSAGE));
         btnSalir.addActionListener(e -> { dispose(); new LoginForm().setVisible(true); });
 
-        menu.add(logo); menu.add(btnGrupos); menu.add(btnAsignacion); menu.add(btnMatricula); menu.add(btnInstitucion); menu.add(btnHoras); menu.add(btnDemo); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
+        menu.add(logo); menu.add(btnGrupos); menu.add(btnAsignacion); menu.add(btnMatricula); menu.add(btnInstitucion); menu.add(btnHoras); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(new JLabel("")); menu.add(btnSalir);
 
         JPanel contenido = new JPanel(new BorderLayout(20,20)); contenido.setOpaque(false);
         JPanel header = new JPanel(new BorderLayout()); header.setBackground(new Color(41,128,185)); header.setBorder(new EmptyBorder(20,25,20,25));
-        JLabel titulo = new JLabel("Bienvenido Coordinador: " + usuario.getNombre()); titulo.setFont(new Font("Segoe UI", Font.BOLD, 26)); titulo.setForeground(Color.WHITE);
+        JLabel titulo = new JLabel("Bienvenido Coordinador"); titulo.setFont(new Font("Segoe UI", Font.BOLD, 26)); titulo.setForeground(Color.WHITE);
         JLabel sub = new JLabel("Operación de prácticas: grupos, instituciones, docentes, estudiantes y horas reglamentarias"); sub.setForeground(Color.WHITE);
         JPanel txt = new JPanel(new GridLayout(2,1)); txt.setOpaque(false); txt.add(titulo); txt.add(sub); header.add(txt, BorderLayout.WEST);
 
@@ -86,7 +83,7 @@ public class CoordinadorDashboard extends JFrame {
         cards.add(card("Horas", String.valueOf(DBHelper.contar("HORAS_PRACTICA")), "Registros de horas", new Color(22,160,133)));
         cards.add(card("Prácticas", String.valueOf(DBHelper.contar("PRACTICA")), "Prácticas activas", new Color(231,76,60)));
 
-        JTextArea ayuda = new JTextArea("Flujo recomendado: 1) Crear o validar institución receptora. 2) Crear grupo. 3) Asignar docente. 4) Vincular estudiante a la práctica. 5) Controlar horas y confirmar avances. El botón Crear Datos Base deja una institución, curso, grupo, práctica y rúbrica para pruebas.");
+        JTextArea ayuda = new JTextArea("Flujo recomendado: 1) Crear o validar institución receptora. 2) Crear grupo. 3) Asignar docente. 4) Vincular estudiante a la práctica. 5) Controlar horas y confirmar avances. El sistema trabaja con los datos reales registrados en Oracle; si falta un dato, créalo desde el módulo correspondiente.");
         ayuda.setLineWrap(true); ayuda.setWrapStyleWord(true); ayuda.setEditable(false); ayuda.setFont(new Font("Segoe UI", Font.PLAIN, 13)); ayuda.setBorder(new EmptyBorder(10,30,15,30)); ayuda.setBackground(new Color(245,247,250));
         contenido.add(header, BorderLayout.NORTH); contenido.add(cards, BorderLayout.CENTER); contenido.add(ayuda, BorderLayout.SOUTH);
         root.add(menu, BorderLayout.WEST); root.add(contenido, BorderLayout.CENTER); setContentPane(root);
